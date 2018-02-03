@@ -13,4 +13,10 @@ GLRenderer::~GLRenderer() {
     destroy();
 }
 
-void GLRenderer::destroy() {}
+void GLRenderer::start() {
+    pthread_create(&threadId, 0, threadStartCallback, this);
+}
+
+void GLRenderer::destroy() {
+
+}

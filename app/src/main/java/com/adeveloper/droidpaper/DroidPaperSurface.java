@@ -9,7 +9,7 @@ import android.view.SurfaceHolder;
 public class DroidPaperSurface implements SurfaceHolder.Callback {
 
     public void surfaceCreated(SurfaceHolder holder) {
-
+        NativeLibLoader.nativeSurfaceCreated();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int w, int h, int format) {
@@ -17,6 +17,7 @@ public class DroidPaperSurface implements SurfaceHolder.Callback {
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
+        NativeLibLoader.nativeSurfaceDestroyed();
 
     }
 

@@ -37,6 +37,8 @@ class GLRenderer {
 
         void drawFrame();
 
+        static void* threadStartCallback(void *thread);
+
 };
 
 #endif //DROIDPAPER2_GLRENDERER_H
