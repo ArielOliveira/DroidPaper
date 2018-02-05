@@ -7,6 +7,7 @@ import android.content.pm.ConfigurationInfo;
 
 import android.os.Bundle;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.activity_main);
 
             NativeLibLoader.load();
+            NativeLibLoader.setRunning(false);
 
             DroidPaperSurface surface = new DroidPaperSurface();
             SurfaceView surfaceView = (SurfaceView)findViewById(R.id.glSurface);
@@ -38,24 +40,42 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    public void surfaceViewClickListener(View v) {
+        if (NativeLibLoader.getRunning()) {
+            NativeLibLoader.setRunning(false);
+            NativeLibLoader.nativeOnPause();
+        } else {
+            NativeLibLoader.setRunning(true);
+            NativeLibLoader.nativeOnResume();
+
+        }
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStart() {
+        super.onStart();
+        NativeLibLoader.nativeOnStart();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        NativeLibLoader.setRunning(true);
+        NativeLibLoader.nativeOnResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        NativeLibLoader.setRunning(false);
+        NativeLibLoader.nativeOnPause();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        NativeLibLoader.setRunning(false);
+        NativeLibLoader.nativeOnStop();
     }
 
 }

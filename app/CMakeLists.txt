@@ -18,6 +18,8 @@ add_library( # Sets the name of the library.
 
              # Provides a relative path to your source file(s).
              src/main/cpp/native-lib.cpp
+             src/main/cpp/shaderLinker.cpp
+             src/main/cpp/EGLSurfaceManager.cpp
              src/main/cpp/GLRenderer.cpp
              src/main/cpp/logger.cpp)
 

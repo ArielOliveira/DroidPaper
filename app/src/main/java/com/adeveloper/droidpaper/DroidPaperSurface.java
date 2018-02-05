@@ -13,10 +13,11 @@ public class DroidPaperSurface implements SurfaceHolder.Callback {
     }
 
     public void surfaceChanged(SurfaceHolder holder, int w, int h, int format) {
-        NativeLibLoader.nativeSurfaceChanged(holder.getSurface());
+        NativeLibLoader.nativeSurfaceChanged(holder.getSurface(), NativeLibLoader.getRunning());
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
+        NativeLibLoader.nativeSurfaceChanged(null, false);
         NativeLibLoader.nativeSurfaceDestroyed();
 
     }
