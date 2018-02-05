@@ -22,6 +22,8 @@ float myTranslation1[] = {1.0f, 0.0f, 0.0f, 0.0f,
                           0.0f, 0.0f, 1.0f, 0.0f,
                           0.0f, 0.0f, 0.0f, 1.0f,};
 
+GLuint vboIds[2];
+
 GLRenderer::GLRenderer(): msg(MSG_NONE), draw(false), gProgram(0), gTranslation(0), VERTEX_POSITION_INDX(0) {
     surfaceManager = new EGLSurfaceManager();
     surfaceAcquired = surfaceManager->hasSurface();
@@ -77,16 +79,29 @@ void GLRenderer::setWindow(ANativeWindow *window) {
 }
 
 void GLRenderer::destroy() {
+    glDeleteBuffers(2, vboIds);
     delete surfaceManager;
     surfaceManager = 0;
+}
+
+void GLRenderer::initVBOs() {
+    glGenBuffers(2, vboIds);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, square, GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, indices, GL_DYNAMIC_DRAW);
 }
 
 void GLRenderer::drawFrame() {
     GLuint offset = 0;
 
-    GLuint vboIds[2];
-
-    GLfloat *squarePointer = square;
+    static float degrees;
+    degrees += 0.01f;
+    if (degrees >= 360) {
+        degrees = 0;
+    }
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -94,31 +109,15 @@ void GLRenderer::drawFrame() {
 
     glUseProgram(gProgram);
 
-    glGenBuffers(2, vboIds);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, squarePointer, GL_DYNAMIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, indices, GL_DYNAMIC_DRAW);
-
     glUniformMatrix4fv(gTranslation, 1, GL_FALSE, myTranslation1);
     glEnableVertexAttribArray(VERTEX_POSITION_INDX);
     glVertexAttribPointer(VERTEX_POSITION_INDX, 2, GL_FLOAT, GL_FALSE, 0, (const void*)offset);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-    glDeleteBuffers(2, vboIds);
-
-    /*
-    glUniformMatrix4fv(gTranslation, 1, GL_FALSE, myTranslation1);
-    glVertexAttribPointer(VERTEX_POSITION_INDX, 2, GL_FLOAT, GL_FALSE, 0, gTriangleVertices);
-    checkGlError("glVertexAttribPointer");
-    glEnableVertexAttribArray(VERTEX_POSITION_INDX);
-    checkGlError("glEnableVertexAttribArray");
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    checkGlError("glDrawArrays");
-    */
+    //rotateY(degrees, myTranslation1);
+    rotateX(degrees, myTranslation1);
+    rotateZ(degrees, myTranslation1);
 
     surfaceManager->swapBuffers();
 }
@@ -128,24 +127,24 @@ void GLRenderer::renderLoop() {
     LOGI("Drawing Enabled");
     while(draw) {
         pthread_mutex_lock(&mutex);
-        switch(msg) {
-            case MSG_WINDOW_SET:
-                if (surfaceManager) {
-                    delete surfaceManager;
-                    surfaceManager = 0;
-                }
-                LOGI("Setting window");
-                surfaceManager = new EGLSurfaceManager(window);
-                surfaceAcquired = surfaceManager->hasSurface();
-                setupGraphics();
-                break;
-            case MSG_RENDER_LOOP_EXIT:
-                draw = false;
-                surfaceAcquired = false;
-                destroy();
-                break;
-            default:
-                break;
+        if (msg == MSG_WINDOW_SET) {
+            if (surfaceManager) {
+                delete surfaceManager;
+                surfaceManager = 0;
+            }
+            LOGI("Setting window");
+            surfaceManager = new EGLSurfaceManager(window);
+            surfaceAcquired = surfaceManager->hasSurface();
+            initVBOs();
+            setupGraphics();
+        }
+        if (msg == MSG_RENDER_LOOP_EXIT) {
+            draw = false;
+            surfaceAcquired = false;
+            destroy();
+        }
+        if (msg == MSG_RENDER_LOOP_PAUSE) {
+            draw = false;
         }
         msg = MSG_NONE;
         if (surfaceAcquired) {

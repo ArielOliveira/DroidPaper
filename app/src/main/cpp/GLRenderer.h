@@ -14,6 +14,7 @@
 #include "EGLSurfaceManager.h"
 #include "shaderLinker.h"
 #include "shaderLib.h"
+#include "matrixUtils.h"
 
 class GLRenderer {
     private:
@@ -34,6 +35,7 @@ class GLRenderer {
         enum RenderThreadMessage {
             MSG_NONE = 0,
             MSG_WINDOW_SET,
+            MSG_RENDER_LOOP_PAUSE,
             MSG_RENDER_LOOP_EXIT
         };
 
@@ -41,6 +43,7 @@ class GLRenderer {
 
         void destroy();
         void renderLoop();
+        void initVBOs();
         void drawFrame();
 
         bool setupGraphics();
