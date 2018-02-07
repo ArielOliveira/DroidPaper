@@ -12,24 +12,25 @@ static GLRenderer *renderer = 0;
 extern "C" {
     JNIEXPORT void JNICALL
     Java_com_adeveloper_droidpaper_NativeLibLoader_nativeOnStart(JNIEnv *env, jobject thisObj) {
-        LOGI("nativeOnStart()");
+        LOGI("OnStart()");
         renderer = new GLRenderer();
     }
 
     JNIEXPORT void JNICALL
     Java_com_adeveloper_droidpaper_NativeLibLoader_nativeOnResume(JNIEnv *env, jobject thisObj) {
-        LOGI("nativeOnResume()");
+        LOGI("OnResume()");
         renderer->start();
     }
 
     JNIEXPORT void JNICALL
     Java_com_adeveloper_droidpaper_NativeLibLoader_nativeOnPause(JNIEnv *env, jobject thisObj) {
-        LOGI("nativeOnStop()");
+        LOGI("OnPause()");
         renderer->stop();
     }
 
     JNIEXPORT void JNICALL
     Java_com_adeveloper_droidpaper_NativeLibLoader_nativeOnStop(JNIEnv *env, jobject thisObj) {
+        LOGI("OnStop()");
         delete renderer;
         renderer = 0;
     }
@@ -43,18 +44,30 @@ extern "C" {
     Java_com_adeveloper_droidpaper_NativeLibLoader_nativeSurfaceChanged(JNIEnv *env, jobject thisObj, jobject surface, jboolean running) {
         if (surface != 0) {
             window = ANativeWindow_fromSurface(env, surface);
-            LOGI("Got window %p", window);
             if (running) {
                 renderer->setWindow(window);
+                LOGI("Got Window &p", window);
             }
         } else {
-            LOGI("Releasing window");
             ANativeWindow_release(window);
         }
     }
 
     JNIEXPORT void JNICALL
+    Java_com_adeveloper_droidpaper_NativeLibLoader_nativeResumeCurrent(JNIEnv *env, jobject thisObj) {
+        LOGI("Destroying surface");
+
+    }
+
+    JNIEXPORT void JNICALL
+    Java_com_adeveloper_droidpaper_NativeLibLoader_nativePauseCurrent(JNIEnv *env, jobject thisObj) {
+        LOGI("Destroying surface");
+
+    }
+
+    JNIEXPORT void JNICALL
     Java_com_adeveloper_droidpaper_NativeLibLoader_nativeSurfaceDestroyed(JNIEnv *env, jobject thisObj) {
         LOGI("Destroying surface");
+
     }
 }

@@ -4,18 +4,7 @@
 
 #include "GLRenderer.h"
 
-GLfloat square[] = {-0.5f, -0.5f,
-                    -0.5f, 0.5f,
-                    0.5f,  0.5f,
-                    0.5f, -0.5f,};
-
-
-GLfloat gTriangleVertices[] = { 0.0f, 0.5f, -0.5f, -0.5f,
-                                      0.5f, -0.5f,};
-
-GLushort triangleIndex[] = {0, 1, 2,};
-
-GLushort indices[] = {0, 1, 2, 3, 0, 2,};
+#include "geometryTestObjects.h"
 
 float myTranslation1[] = {1.0f, 0.0f, 0.0f, 0.0f,
                           0.0f, 1.0f, 0.0f, 0.0f,
@@ -31,13 +20,19 @@ GLRenderer::GLRenderer(): msg(MSG_NONE), draw(false), gProgram(0), gTranslation(
 }
 
 GLRenderer::~GLRenderer() {
-    destroy();
+    pthread_mutex_destroy(&mutex);
+
+    glDeleteBuffers(2, vboIds);
 }
 
 void GLRenderer::start() {
-    LOGI("Starting Thread");
     pthread_create(&threadId, 0, threadStartCallback, this);
+}
 
+void GLRenderer::pause() {
+    pthread_mutex_lock(&mutex);
+    msg = MSG_RENDER_LOOP_PAUSE;
+    pthread_mutex_unlock(&mutex);
 }
 
 void GLRenderer::stop() {
@@ -49,8 +44,6 @@ void GLRenderer::stop() {
 }
 
 bool GLRenderer::setupGraphics() {
-    LOGI("setupGraphics(%d, %d)", surfaceManager->getWidth(), surfaceManager->getHeight());
-
     gProgram = init(vShaderStr, fShaderStr);
     if (!gProgram) {
         LOGE("Could not create program. %i", gProgram);
@@ -79,7 +72,7 @@ void GLRenderer::setWindow(ANativeWindow *window) {
 }
 
 void GLRenderer::destroy() {
-    glDeleteBuffers(2, vboIds);
+    surfaceAcquired = false;
     delete surfaceManager;
     surfaceManager = 0;
 }
@@ -88,18 +81,18 @@ void GLRenderer::initVBOs() {
     glGenBuffers(2, vboIds);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, square, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, cube, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, indices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 36, cubeIndices, GL_DYNAMIC_DRAW);
 }
 
 void GLRenderer::drawFrame() {
     GLuint offset = 0;
 
     static float degrees;
-    degrees += 0.01f;
-    if (degrees >= 360) {
+    degrees += 0.001f;
+    if (degrees >= 1.0f) {
         degrees = 0;
     }
 
@@ -109,42 +102,50 @@ void GLRenderer::drawFrame() {
 
     glUseProgram(gProgram);
 
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     glUniformMatrix4fv(gTranslation, 1, GL_FALSE, myTranslation1);
     glEnableVertexAttribArray(VERTEX_POSITION_INDX);
-    glVertexAttribPointer(VERTEX_POSITION_INDX, 2, GL_FLOAT, GL_FALSE, 0, (const void*)offset);
+    glVertexAttribPointer(VERTEX_POSITION_INDX, 3, GL_FLOAT, GL_FALSE, 0, (const void*)offset);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+
+    myTranslation1[3] = degrees;
 
     //rotateY(degrees, myTranslation1);
-    rotateX(degrees, myTranslation1);
-    rotateZ(degrees, myTranslation1);
+    //rotateX(degrees, myTranslation1);
+    //rotateZ(degrees, myTranslation1);
 
     surfaceManager->swapBuffers();
 }
 
+void GLRenderer::initialize() {
+    EGLSurfaceManager *_surfaceDummy = surfaceManager;
+    surfaceManager = new EGLSurfaceManager(window);
+    delete _surfaceDummy;
+
+    surfaceAcquired = surfaceManager->hasSurface();
+    initVBOs();
+    setupGraphics();
+}
+
 void GLRenderer::renderLoop() {
     draw = true;
-    LOGI("Drawing Enabled");
     while(draw) {
         pthread_mutex_lock(&mutex);
-        if (msg == MSG_WINDOW_SET) {
-            if (surfaceManager) {
-                delete surfaceManager;
-                surfaceManager = 0;
-            }
-            LOGI("Setting window");
-            surfaceManager = new EGLSurfaceManager(window);
-            surfaceAcquired = surfaceManager->hasSurface();
-            initVBOs();
-            setupGraphics();
-        }
-        if (msg == MSG_RENDER_LOOP_EXIT) {
-            draw = false;
-            surfaceAcquired = false;
-            destroy();
-        }
-        if (msg == MSG_RENDER_LOOP_PAUSE) {
-            draw = false;
+        switch(msg) {
+            case MSG_WINDOW_SET:
+                initialize();
+                break;
+            case MSG_RENDER_LOOP_EXIT:
+                draw = false;
+                destroy();
+                break;
+            case MSG_RENDER_LOOP_PAUSE:
+                break;
+            default:
+                break;
         }
         msg = MSG_NONE;
         if (surfaceAcquired) {
@@ -152,7 +153,6 @@ void GLRenderer::renderLoop() {
         }
         pthread_mutex_unlock(&mutex);
     }
-    LOGI("Drawing Disabled");
 }
 
 void* GLRenderer::threadStartCallback(void *thread) {

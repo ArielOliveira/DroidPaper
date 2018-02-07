@@ -20,7 +20,10 @@ add_library( # Sets the name of the library.
              src/main/cpp/native-lib.cpp
              src/main/cpp/shaderLinker.cpp
              src/main/cpp/matrixUtils.cpp
+             src/main/cpp/vectorSorter.cpp
+             src/main/cpp/Mountain.cpp
              src/main/cpp/EGLSurfaceManager.cpp
+             src/main/cpp/GLBufferManager.cpp
              src/main/cpp/GLRenderer.cpp
              src/main/cpp/logger.cpp)
 

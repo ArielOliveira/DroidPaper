@@ -6,12 +6,10 @@
 #define DROIDPAPER2_GLRENDERER_H
 
 #include <pthread.h>
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
-
 #include <android/native_window.h>
 
 #include "EGLSurfaceManager.h"
+#include "GLBufferManager.h"
 #include "shaderLinker.h"
 #include "shaderLib.h"
 #include "matrixUtils.h"
@@ -36,11 +34,13 @@ class GLRenderer {
             MSG_NONE = 0,
             MSG_WINDOW_SET,
             MSG_RENDER_LOOP_PAUSE,
+            MSG_RENDER_LOOP_RESUME,
             MSG_RENDER_LOOP_EXIT
         };
 
         enum RenderThreadMessage msg;
 
+        void initialize();
         void destroy();
         void renderLoop();
         void initVBOs();
@@ -56,6 +56,8 @@ class GLRenderer {
         virtual ~GLRenderer();
 
         void start();
+        void resume();
+        void pause();
         void stop();
         void setWindow(ANativeWindow *window);
 

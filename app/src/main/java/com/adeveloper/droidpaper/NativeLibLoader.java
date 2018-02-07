@@ -32,6 +32,9 @@ public class NativeLibLoader {
     public static native void nativeOnResume();
     public static native void nativeOnPause();
     public static native void nativeOnStop();
+    public static native void nativePauseCurrent();
+    public static native void nativeResumeCurrent();
+
 
 
 }

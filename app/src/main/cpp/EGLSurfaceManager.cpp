@@ -45,14 +45,14 @@ EGLSurfaceManager::EGLSurfaceManager(ANativeWindow *window) {
         hasSurfaceV = false;
         return;
     }
-/*
+
     if (!eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format)) {
         LOGE("eglGetConfigAttrib() returned error %d", eglGetError());
         hasSurfaceV = false;
         return;
     }
-*/
-    //ANativeWindow_setBuffersGeometry(window, 0, 0, format);
+
+    ANativeWindow_setBuffersGeometry(window, 0, 0, format);
 
     if (!(surface = eglCreateWindowSurface(display, config, window, surfaceAttribList))) {
         LOGE("eglCreateWindowSurface() returned error %d", eglGetError());

@@ -43,10 +43,10 @@ public class MainActivity extends AppCompatActivity {
     public void surfaceViewClickListener(View v) {
         if (NativeLibLoader.getRunning()) {
             NativeLibLoader.setRunning(false);
-            NativeLibLoader.nativeOnPause();
+            NativeLibLoader.nativePauseCurrent();
         } else {
             NativeLibLoader.setRunning(true);
-            NativeLibLoader.nativeOnResume();
+            NativeLibLoader.nativeResumeCurrent();
 
         }
     }

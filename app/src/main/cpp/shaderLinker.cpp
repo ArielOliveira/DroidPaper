@@ -6,12 +6,7 @@
 #include "shaderLinker.h"
 
 GLuint loadShader(const char *shaderSrc, GLenum type) {
-    if (type == GL_VERTEX_SHADER) {
-        LOGI("Loading Vertex Shader");
-    } else {
-        LOGI("Loading Fragment Shader");
-    }
-    GLuint shader = glCreateShader(type);
+     GLuint shader = glCreateShader(type);
 
     if (shader) {
         glShaderSource(shader, 1, &shaderSrc, NULL);
