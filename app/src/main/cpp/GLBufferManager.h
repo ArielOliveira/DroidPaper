@@ -6,9 +6,12 @@
 #define DROIDPAPER2_GLBUFFERMANAGER_H
 
 #include <GLES2/gl2.h>
-void cacheBufferByID(GLfloat *verticesData, GLuint verticesNumber, GLuint id, GLenum hint);
-void updateBufferByID();
-void bindBuffer(GLuint *id);
 
+const GLuint VERTEX_POSITION_INDX = 0;
+
+const GLuint VERTEX_POSITION_SIZE = 2;
+
+void cacheBufferByID(GLfloat *bufferData, int bufferSize, GLuint *id, GLenum hint);
+void cacheIndiceByID(GLushort *indicesData, int indicesNumber, GLuint *id, GLenum hint);
 
 #endif //DROIDPAPER2_GLBUFFERMANAGER_H

@@ -13,7 +13,7 @@ float myTranslation1[] = {1.0f, 0.0f, 0.0f, 0.0f,
 
 GLuint vboIds[2];
 
-GLRenderer::GLRenderer(): msg(MSG_NONE), draw(false), gProgram(0), gTranslation(0), VERTEX_POSITION_INDX(0) {
+GLRenderer::GLRenderer(): msg(MSG_NONE), draw(false), gProgram(0), gTranslation(0) {
     surfaceManager = new EGLSurfaceManager();
     surfaceAcquired = surfaceManager->hasSurface();
     pthread_mutex_init(&mutex, 0);
@@ -75,16 +75,19 @@ void GLRenderer::destroy() {
     surfaceAcquired = false;
     delete surfaceManager;
     surfaceManager = 0;
+
+    delete mountain;
+    mountain = 0;
 }
 
 void GLRenderer::initVBOs() {
     glGenBuffers(2, vboIds);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, cube, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, square, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 36, cubeIndices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, indices, GL_DYNAMIC_DRAW);
 }
 
 void GLRenderer::drawFrame() {
@@ -103,13 +106,13 @@ void GLRenderer::drawFrame() {
     glUseProgram(gProgram);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
 
     glUniformMatrix4fv(gTranslation, 1, GL_FALSE, myTranslation1);
     glEnableVertexAttribArray(VERTEX_POSITION_INDX);
-    glVertexAttribPointer(VERTEX_POSITION_INDX, 3, GL_FLOAT, GL_FALSE, 0, (const void*)offset);
-
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+    //glVertexAttribPointer(VERTEX_POSITION_INDX, 2, GL_FLOAT, GL_FALSE, 0, (const void*)offset);
+    mountain->draw();
+    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
     myTranslation1[3] = degrees;
 
@@ -124,10 +127,14 @@ void GLRenderer::initialize() {
     EGLSurfaceManager *_surfaceDummy = surfaceManager;
     surfaceManager = new EGLSurfaceManager(window);
     delete _surfaceDummy;
-
     surfaceAcquired = surfaceManager->hasSurface();
-    initVBOs();
+
     setupGraphics();
+    glGenBuffers(2, vboIds);
+    mountain = new Mountain(surfaceManager->getWidth(), 0.5f, (1.0f/4.0f), &vboIds[0]);
+
+    //initVBOs();
+
 }
 
 void GLRenderer::renderLoop() {

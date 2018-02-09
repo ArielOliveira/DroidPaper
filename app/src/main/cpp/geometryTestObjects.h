@@ -18,9 +18,9 @@ GLfloat cube[] = { -0.5f,  0.5f, -0.5f,
                    -0.5f, -0.5f, -1.0f,};
 
 GLfloat square[] = {-0.5f, -0.5f,
-                    -0.5f, 0.5f,
-                    0.5f,  0.5f,
-                    0.5f, -0.5f,};
+                    -0.5f,  0.5f,
+                     0.5f,  0.5f,
+                     0.5f, -0.5f,};
 
 
 GLfloat gTriangleVertices[] = { 0.0f, 0.5f, -0.5f, -0.5f,
@@ -35,6 +35,6 @@ GLushort cubeIndices[] = {0, 1, 2,  0, 2, 3,
                           7, 4, 5,  7, 5, 6,
                           7, 2, 3,  7, 3, 4,};
 
-GLushort indices[] = {0, 1, 2, 3, 0, 2,};
+GLushort indices[] = {2, 1, 0, 2, 0, 3,};
 
 #endif //DROIDPAPER2_GEOMETRYTESTOBJECTS_H

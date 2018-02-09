@@ -42,7 +42,6 @@ void makeMountain(int right, int left, float *vector, float roughness, float sca
 }
 
 void setBorders(int width, float *vector, float height, float roughness, float scale, float seed) {
-
     vector[width-1] = height / 2 + (randomizeFloat(2.0) * scale * 2) - scale;
 
     if (seed == -2) vector[0] = height / 2 + (randomizeFloat(2.0) * scale * 2) - scale;
@@ -56,5 +55,4 @@ void setBorders(int width, float *vector, float height, float roughness, float s
 
     scale *= roughness;
     makeMountain(width-1, width / 2, vector, roughness, scale);
-
 }

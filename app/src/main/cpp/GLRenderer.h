@@ -13,6 +13,7 @@
 #include "shaderLinker.h"
 #include "shaderLib.h"
 #include "matrixUtils.h"
+#include "Mountain.h"
 
 class GLRenderer {
     private:
@@ -26,7 +27,7 @@ class GLRenderer {
 
         ANativeWindow *window;
 
-        const GLuint VERTEX_POSITION_INDX;
+        Mountain *mountain;
 
         bool draw;
 
