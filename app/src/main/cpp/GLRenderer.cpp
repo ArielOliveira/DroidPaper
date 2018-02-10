@@ -78,6 +78,8 @@ void GLRenderer::destroy() {
 
     delete mountain;
     mountain = 0;
+
+    glDeleteBuffers(2, vboIds);
 }
 
 void GLRenderer::initVBOs() {
@@ -94,10 +96,12 @@ void GLRenderer::drawFrame() {
     GLuint offset = 0;
 
     static float degrees;
-    degrees += 0.001f;
-    if (degrees >= 1.0f) {
+    degrees -= 0.005f;
+    if (degrees <= -1.0f) {
+        mountain->update();
         degrees = 0;
     }
+
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -114,7 +118,7 @@ void GLRenderer::drawFrame() {
     mountain->draw();
     //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-    myTranslation1[3] = degrees;
+    //myTranslation1[3] = degrees;
 
     //rotateY(degrees, myTranslation1);
     //rotateX(degrees, myTranslation1);
@@ -131,10 +135,8 @@ void GLRenderer::initialize() {
 
     setupGraphics();
     glGenBuffers(2, vboIds);
-    mountain = new Mountain(surfaceManager->getWidth(), 0.5f, (1.0f/4.0f), &vboIds[0]);
-
-    //initVBOs();
-
+    int width = surfaceManager->getWidth();
+    mountain = new Mountain(width, width+(width/2), 0.5f, (1.0f/4.0f), &vboIds[0]);
 }
 
 void GLRenderer::renderLoop() {
