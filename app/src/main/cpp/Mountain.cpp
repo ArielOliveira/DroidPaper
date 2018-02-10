@@ -44,13 +44,19 @@ void Mountain::draw() {
 void Mountain::bind() {glBindBuffer(GL_ARRAY_BUFFER, *MOUNTAIN_ID);}
 
 void Mountain::update() {
-    shape(length/3);
+    shape(length/3, off);
+    LOGI("First pair of vertices %f %f %f %f", vertices[0], vertices[1], vertices[2], vertices[3]);
+    LOGI("Middle pair of vertices %f %f %f %f", vertices[(stride/2)-4], vertices[(stride/2)-3], vertices[(stride/2)-2], vertices[(stride/2)-1]);
+    LOGI("Last pair of vertices %f %f %f %f", vertices[stride-4], vertices[stride-3], vertices[stride-2], vertices[stride-1]);
 
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat) * offset, sizeof(GLfloat) * stride, vertices);
 
     offset += stride;
-    if (offset >= bufferSize)
+    off += 1.0f;
+    if (offset >= bufferSize) {
+        off = 0;
         offset = 0;
+    }
 }
 
 void Mountain::shape(int _length, float offScreen) {
