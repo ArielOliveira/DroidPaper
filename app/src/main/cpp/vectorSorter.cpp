@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include "vectorSorter.h"
+#include "logger.h"
 
 #define AVG2(a,b) ((a + b) / 2)
 
 int _windowSize;
 int _offScreen;
 
-void makeMountain(int right, int left, float *vector, float roughness, float scale);
+void makeMountain(int right, int left, GLfloat *vector, float roughness, float scale);
 
 float randomizeFloat(float max) {
     float randomN;
@@ -16,23 +17,26 @@ float randomizeFloat(float max) {
     return randomN-1.0;
 }
 
-void setVector(float *vector, int size) {
-    int i;
+void initRand() {
     srand(time(NULL));
-    for (i = 0; i < size; i++) {
-        vector[i] = 0;
-    }
 }
 
-void setDisplacement(int right, int left, int middle, float *vector, float scale) {
-    vector[(middle*4)-4] = (((float) (middle - 0) / (_windowSize / 2) - 1.0f) + _offScreen);
-    vector[(middle*4)-3] = AVG2(vector[(left*4)-3], vector[(right*4)-3]);
-    vector[(middle*4)-3] += (randomizeFloat(1.0) * scale * 2) - scale;
-    vector[(middle*4)-2] = (((float) (middle - 0) / (_windowSize / 2) - 1.0f) + _offScreen);
-    vector[(middle*4)-1] = -1.0f;
+void setDisplacement(int right, int left, int middle, GLfloat *vector, float scale) {
+    if (left == 0 || left == 1)
+        left++;
+
+    int problem = middle;
+    if (middle == 1)
+        problem++;
+
+    vector[(problem*4)-4] = (((float) middle / (_windowSize / 2.0f) - 1.0f) + _offScreen);
+    vector[(problem*4)-3] = AVG2(vector[(left*4)-3], vector[(right*4)-3]);
+    vector[(problem*4)-3] += (randomizeFloat(1.0) * scale * 2) - scale;
+    vector[(problem*4)-2] = (((float) middle / (_windowSize / 2.0f) - 1.0f) + _offScreen);
+    vector[(problem*4)-1] = -1.0f;
 }
 
-void makeMountain(int right, int left, float *vector, float roughness, float scale) {
+void makeMountain(int right, int left, GLfloat *vector, float roughness, float scale) {
     if (right - left > 1 && right > 1) {
         int middle = AVG2(right, left);
         setDisplacement(right, left, middle, vector, scale);
@@ -45,32 +49,31 @@ void makeMountain(int right, int left, float *vector, float roughness, float sca
     }
 }
 
-void setBorders(int windowSize, int width, float offScreen, float *vector, float height, float roughness, float scale, float seed) {
+void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, float scale, GLfloat seed) {
     _windowSize = windowSize;
     _offScreen = offScreen;
 
-
-    vector[(width*4)-4] = (((float) (width - 0) / (windowSize / 2) - 1.0f) + offScreen);
+    vector[(width*4)-4] = (((float) width / (windowSize / 2.0f) - 1.0f) + offScreen);
     vector[(width*4)-3] = height / 2 + (randomizeFloat(2.0) * scale * 2) - scale;
-    vector[(width*4)-2] = (((float) (width - 0) / (windowSize / 2) - 1.0f) + offScreen);
+    vector[(width*4)-2] = (((float) width / (windowSize / 2.0f) - 1.0f) + offScreen);
     vector[(width*4)-1] = -1.0f;
 
-    vector[0] = -1.0f + offScreen;
-    if (seed == -2) {
+    vector[0] = -1.0f + _offScreen;
+    if (seed <= -2.0f)
         vector[1] = height / 2 + (randomizeFloat(2.0) * scale * 2) - scale;
-    } else {
+    else
         vector[1] = seed;
-    }
 
-    vector[2] = -1.0f + offScreen;
+
+    vector[2] = -1.0f + _offScreen;
     vector[3] = -1.0f;
 
     scale *= roughness;
-    setDisplacement(width-1, 0, width / 2, vector, scale);
+    setDisplacement(width, 0, width/2, vector, scale);
 
     scale *= roughness;
-    makeMountain(width / 2, 0, vector, roughness, scale);
+    makeMountain(width/2, 0, vector, roughness, scale);
 
     scale *= roughness;
-    makeMountain(width-1, width / 2, vector, roughness, scale);
+    makeMountain(width, width/2, vector, roughness, scale);
 }

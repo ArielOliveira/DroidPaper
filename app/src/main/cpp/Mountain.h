@@ -11,21 +11,18 @@
 class Mountain {
     private:
         GLfloat *vertices;
+        GLfloat lastHeightMapped;
+
+        float scale;
+        float mountainRoughness;
 
         unsigned int windowSize;
         unsigned int bufferSize;
         unsigned int length;
         unsigned int verticesNumber;
 
-        float *heightMap;
-        float scale;
-        float mountainRoughness;
-        float lastHeightMapped;
-
         unsigned int offset;
         unsigned int stride;
-
-        //GLenum DRAW_HINT;
 
         GLuint *MOUNTAIN_ID;
 
@@ -36,7 +33,7 @@ class Mountain {
         Mountain();
         ~Mountain();
 
-        void shape(int _length, float offScreen = 0);
+        void shape(unsigned int _length, float offScreen = 0);
         void bind();
         void update();
         void draw();

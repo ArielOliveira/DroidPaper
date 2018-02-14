@@ -5,6 +5,9 @@
 #ifndef DROIDPAPEREVOLUTION_VECTORSORTER_H
 #define DROIDPAPEREVOLUTION_VECTORSORTER_H
 
-void setBorders(int windowSize, int width, float offScreen, float *vector, float height, float roughness, float scale, float seed = -2);
+#include <GLES2/gl2.h>
+
+void initRand();
+void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, float scale, GLfloat seed = -2);
 
 #endif //DROIDPAPEREVOLUTION_VECTORSORTER_H

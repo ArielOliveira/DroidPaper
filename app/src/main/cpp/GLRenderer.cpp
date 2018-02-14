@@ -118,7 +118,7 @@ void GLRenderer::drawFrame() {
     mountain->draw();
     //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-    //myTranslation1[3] = degrees;
+    myTranslation1[3] -= 0.005f;
 
     //rotateY(degrees, myTranslation1);
     //rotateX(degrees, myTranslation1);
