@@ -6,19 +6,47 @@
 #include "GLBufferManager.h"
 #include "logger.h"
 
-float off = 3.0f;
-
-Mountain::Mountain(unsigned int _windowSize, unsigned int _length, float _mountainRoughness, float _scale, GLuint *ID):
-        windowSize(_windowSize), length(_length), lastHeightMapped(-2), stride((_length/3)*4),
-        mountainRoughness(_mountainRoughness), scale(_scale), MOUNTAIN_ID(ID) {
+Mountain::Mountain(unsigned int _windowSize, unsigned int _length, float _mountainRoughness, float _scrollSpeed, float _maxHeight, GLint *_translationShader, GLuint *ID):
+        windowSize(_windowSize), length(_length), stride((_length/3)*4),
+        mountainRoughness(_mountainRoughness), scrollSpeed(_scrollSpeed),  maxHeight(_maxHeight),
+        scale(_maxHeight/4), translationShader(_translationShader), MOUNTAIN_ID(ID) {
 
     bufferSize = length*4;
     offset = 0;
     verticesNumber = length*2;
     vertices = new GLfloat[bufferSize];
+    lastHeightMapped = 0;
 
-    initRand();
+    moved = 0;
+
+    translation = new float[16];
+    translation[0] = 1.0f;
+    translation[1] = 0.0f;
+    translation[2] = 0.0f;
+    translation[3] = 0.0f;
+
+    translation[4] = 0.0f;
+    translation[5] = 1.0f;
+    translation[6] = 0.0f;
+    translation[7] = 0.0f;
+
+    translation[8] = 0.0f;
+    translation[9] = 0.0f;
+    translation[10] = 1.0f;
+    translation[11] = 0.0f;
+
+    translation[12] = 0.0f;
+    translation[13] = 0.0f;
+    translation[14] = 0.0f;
+    translation[15] = 1.0f;
+
+    off = 3.0f;
+
+    //initRand();
     shape(length);
+    lastHeightMapped = new GLfloat[4];
+    seedVertice(length);
+
     cache();
 
     delete vertices;
@@ -29,6 +57,8 @@ Mountain::Mountain(unsigned int _windowSize, unsigned int _length, float _mounta
 
 Mountain::~Mountain() {
     delete vertices;
+    delete lastHeightMapped;
+    delete translation;
 }
 
 void Mountain::cache() {
@@ -36,6 +66,16 @@ void Mountain::cache() {
 }
 
 void Mountain::draw() {
+    if (moved <= -1.0f) {
+        update();
+        moved = 0;
+    }
+
+    glUniformMatrix4fv(*translationShader, 1, GL_FALSE, translation);
+
+    moved -= scrollSpeed;
+    bind();
+    translation[3] -= scrollSpeed;
     glVertexAttribPointer(VERTEX_POSITION_INDX, VERTEX_POSITION_SIZE, GL_FLOAT, GL_FALSE, 0, 0);
     glDrawArrays(GL_LINES, 0, verticesNumber);
 }
@@ -43,8 +83,10 @@ void Mountain::draw() {
 void Mountain::bind() {glBindBuffer(GL_ARRAY_BUFFER, *MOUNTAIN_ID);}
 
 void Mountain::update() {
-    shape(length/3, off);
-
+    unsigned int updateSize = length/3;
+    shape(updateSize, off);
+    seedVertice(updateSize);
+    bind();
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat) * offset, sizeof(GLfloat) * stride, vertices);
 
     offset += stride;
@@ -54,12 +96,17 @@ void Mountain::update() {
     }
 }
 
-void Mountain::shape(unsigned int _length, float offScreen) {
-    setBorders(windowSize, _length, offScreen, vertices, 1.0f, mountainRoughness, scale, lastHeightMapped);
-    lastHeightMapped = vertices[(_length*4)-3];
-
+void Mountain::seedVertice(unsigned int _length) {
+    lastHeightMapped[0] = vertices[(_length*4)-4];
+    lastHeightMapped[1] = vertices[(_length*4)-3];
+    lastHeightMapped[2] = vertices[(_length*4)-2];
+    lastHeightMapped[3] = vertices[(_length*4)-1];
 }
 
-float Mountain::getLast() {return lastHeightMapped;}
+void Mountain::shape(unsigned int _length, float offScreen) {
+    setBorders(windowSize, _length, offScreen, vertices, maxHeight, mountainRoughness, scale, lastHeightMapped);
+}
+
+void Mountain::setTranslationValueIndex(int index, float value) {translation[index] = value;}
 
 

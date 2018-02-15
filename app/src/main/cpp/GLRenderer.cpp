@@ -6,12 +6,12 @@
 
 #include "geometryTestObjects.h"
 
-float myTranslation1[] = {1.0f, 0.0f, 0.0f, 0.0f,
-                          0.0f, 1.0f, 0.0f, 0.0f,
-                          0.0f, 0.0f, 1.0f, 0.0f,
-                          0.0f, 0.0f, 0.0f, 1.0f,};
+float squareColors[] = {0.545, 0.271, 0.075, 1.0f,
+                        0.545, 0.271, 0.075, 1.0f,
+                        0.545, 0.271, 0.075, 1.0f,
+                        0.545, 0.271, 0.075, 1.0f,};
 
-GLuint vboIds[2];
+GLuint vboIds[3];
 
 GLRenderer::GLRenderer(): msg(MSG_NONE), draw(false), gProgram(0), gTranslation(0) {
     surfaceManager = new EGLSurfaceManager();
@@ -22,7 +22,7 @@ GLRenderer::GLRenderer(): msg(MSG_NONE), draw(false), gProgram(0), gTranslation(
 GLRenderer::~GLRenderer() {
     pthread_mutex_destroy(&mutex);
 
-    glDeleteBuffers(2, vboIds);
+    glDeleteBuffers(3, vboIds);
 }
 
 void GLRenderer::start() {
@@ -55,6 +55,7 @@ bool GLRenderer::setupGraphics() {
     LOGI("glBindAttribLocation(\"vPosition\") = %d\n",
          VERTEX_POSITION_INDX);
 
+    gColor = glGetUniformLocation(gProgram, "uniformColor");
     gTranslation = glGetUniformLocation(gProgram, "myTranslation");
 
     glViewport(0, 0, surfaceManager->getWidth(), surfaceManager->getHeight());
@@ -76,8 +77,7 @@ void GLRenderer::destroy() {
     delete surfaceManager;
     surfaceManager = 0;
 
-    delete mountain;
-    mountain = 0;
+    mountains.clear();
 
     glDeleteBuffers(2, vboIds);
 }
@@ -86,22 +86,14 @@ void GLRenderer::initVBOs() {
     glGenBuffers(2, vboIds);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, square, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, square, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, indices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, indices, GL_STATIC_DRAW);
 }
 
 void GLRenderer::drawFrame() {
     GLuint offset = 0;
-
-    static float degrees;
-    degrees -= 0.005f;
-    if (degrees <= -1.0f) {
-        mountain->update();
-        degrees = 0;
-    }
-
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -112,17 +104,16 @@ void GLRenderer::drawFrame() {
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
 
-    glUniformMatrix4fv(gTranslation, 1, GL_FALSE, myTranslation1);
-    glEnableVertexAttribArray(VERTEX_POSITION_INDX);
-    //glVertexAttribPointer(VERTEX_POSITION_INDX, 2, GL_FLOAT, GL_FALSE, 0, (const void*)offset);
-    mountain->draw();
-    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+    glUniform4f(gColor, color[0]+0.075f, color[1]+0.075f, color[2]+0.075f, color[3]);
+    mountains[0]->draw();
 
-    myTranslation1[3] -= 0.005f;
+    glUniform4f(gColor, color[0], color[1], color[2], color[3]);
+    mountains[1]->draw();
 
-    //rotateY(degrees, myTranslation1);
-    //rotateX(degrees, myTranslation1);
-    //rotateZ(degrees, myTranslation1);
+    glUniform4f(gColor, color[0]+0.150f, color[1]+0.150f, color[2]+0.150f, color[3]+0.150f);
+    mountains[2]->draw();
+
+
 
     surfaceManager->swapBuffers();
 }
@@ -134,9 +125,18 @@ void GLRenderer::initialize() {
     surfaceAcquired = surfaceManager->hasSurface();
 
     setupGraphics();
-    glGenBuffers(2, vboIds);
-    int width = surfaceManager->getWidth();
-    mountain = new Mountain(width, width+(width/2), 0.5f, (1.0f/4.0f), &vboIds[0]);
+
+
+    glGenBuffers(3, vboIds);
+    unsigned int width = (unsigned)surfaceManager->getWidth();
+    mountains = {new Mountain(width, width+(width/2), 0.5f, 0.005f, 1.0f, &gTranslation, &vboIds[0]),
+                 new Mountain(width, width+(width/2), 0.6f, 0.0025f, 1.0f, &gTranslation, &vboIds[1]),
+                 new Mountain(width, width+(width/2), 0.7f, 0.00125f, 1.0f, &gTranslation, &vboIds[2])};
+
+    mountains[0]->setTranslationValueIndex(7, -0.70f);
+    mountains[1]->setTranslationValueIndex(7, -0.10f);
+
+    glEnableVertexAttribArray(VERTEX_POSITION_INDX);
 }
 
 void GLRenderer::renderLoop() {

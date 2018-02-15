@@ -7,6 +7,8 @@
 
 #include <pthread.h>
 #include <android/native_window.h>
+#include <vector>
+using std::vector;
 
 #include "EGLSurfaceManager.h"
 #include "GLBufferManager.h"
@@ -24,10 +26,11 @@ class GLRenderer {
 
         GLuint gProgram;
         GLint gTranslation;
+        GLint gColor;
 
         ANativeWindow *window;
 
-        Mountain *mountain;
+        vector<Mountain*> mountains;
 
         bool draw;
 

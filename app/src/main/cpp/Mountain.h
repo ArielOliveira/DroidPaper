@@ -11,10 +11,17 @@
 class Mountain {
     private:
         GLfloat *vertices;
-        GLfloat lastHeightMapped;
+        GLfloat *lastHeightMapped;
 
         float scale;
+        float maxHeight;
+        float off;
+        float moved;
+        float scrollSpeed;
         float mountainRoughness;
+        float *translation;
+
+        GLint *translationShader;
 
         unsigned int windowSize;
         unsigned int bufferSize;
@@ -26,19 +33,24 @@ class Mountain {
 
         GLuint *MOUNTAIN_ID;
 
+        void seedVertice(unsigned int _length);
         void cache();
     public:
 
-        Mountain(unsigned int _windowSize, unsigned int _length, float _mountainRoughness, float _scale, GLuint *_ID);
+        Mountain(unsigned int _windowSize, unsigned int _length,
+                 float _mountainRoughness, float _scrollSpeed, float _maxHeight,
+                 GLint *_translationShader, GLuint *_ID);
         Mountain();
         ~Mountain();
+
+        void setTranslationValueIndex(int index, float value);
+        float getTranslationValueIndex(int index);
 
         void shape(unsigned int _length, float offScreen = 0);
         void bind();
         void update();
         void draw();
 
-        float getLast();
 };
 
 

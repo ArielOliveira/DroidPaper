@@ -8,6 +8,7 @@
 #include <GLES2/gl2.h>
 
 const GLuint VERTEX_POSITION_INDX = 0;
+const GLuint VERTEX_COLOR_INDX = 1;
 
 const GLuint VERTEX_POSITION_SIZE = 2;
 

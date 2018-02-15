@@ -46,7 +46,7 @@ extern "C" {
             window = ANativeWindow_fromSurface(env, surface);
             if (running) {
                 renderer->setWindow(window);
-                LOGI("Got Window &p", window);
+                LOGI("Got Window %p", window);
             }
         } else {
             ANativeWindow_release(window);

@@ -7,6 +7,23 @@
 
 #include <GLES2/gl2.h>
 
+float myTranslation1[] = {1.0f, 0.0f, 0.0f, 0.0f,
+                          0.0f, 1.0f, 0.0f, 0.0f,
+                          0.0f, 0.0f, 1.0f, 0.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f,};
+
+float myTranslation2[] = {1.0f, 0.0f, 0.0f, 0.0f,
+                          0.0f, 1.0f, 0.0f, 0.0f,
+                          0.0f, 0.0f, 1.0f, 0.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f,};
+
+float myTranslation3[] = {1.0f, 0.0f, 0.0f, 0.0f,
+                          0.0f, 1.0f, 0.0f, 0.0f,
+                          0.0f, 0.0f, 1.0f, 0.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f,};
+
+float color[] = {0.545, 0.271, 0.075, 1.0f,};
+
 GLfloat cube[] = { -0.5f,  0.5f, -0.5f,
                    -0.5f,  0.5f, -0.5f,
                    0.5f, -0.5f, -0.5f,
@@ -22,9 +39,9 @@ GLfloat square[] = {-0.5f, -0.5f,
                      0.5f,  0.5f,
                      0.5f, -0.5f,};
 
-
 GLfloat gTriangleVertices[] = { 0.0f, 0.5f, -0.5f, -0.5f,
                                 0.5f, -0.5f,};
+
 
 GLushort triangleIndex[] = {0, 1, 2,};
 

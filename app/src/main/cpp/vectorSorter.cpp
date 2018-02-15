@@ -26,13 +26,13 @@ void setDisplacement(int right, int left, int middle, GLfloat *vector, float sca
         left++;
 
     int problem = middle;
-    if (middle == 1)
-        problem++;
+    //if (middle == 1)
+       //problem++;
 
-    vector[(problem*4)-4] = (((float) middle / (_windowSize / 2.0f) - 1.0f) + _offScreen);
+    vector[(problem*4)-4] = (((float) (middle) / (_windowSize / 2.0f) - 1.0f) + _offScreen);
     vector[(problem*4)-3] = AVG2(vector[(left*4)-3], vector[(right*4)-3]);
     vector[(problem*4)-3] += (randomizeFloat(1.0) * scale * 2) - scale;
-    vector[(problem*4)-2] = (((float) middle / (_windowSize / 2.0f) - 1.0f) + _offScreen);
+    vector[(problem*4)-2] = (((float) (middle) / (_windowSize / 2.0f) - 1.0f) + _offScreen);
     vector[(problem*4)-1] = -1.0f;
 }
 
@@ -49,24 +49,27 @@ void makeMountain(int right, int left, GLfloat *vector, float roughness, float s
     }
 }
 
-void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, float scale, GLfloat seed) {
+void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, float scale, GLfloat *seed) {
     _windowSize = windowSize;
     _offScreen = offScreen;
 
-    vector[(width*4)-4] = (((float) width / (windowSize / 2.0f) - 1.0f) + offScreen);
+    vector[(width*4)-4] = (((float) width / (windowSize / 2) - 1) + offScreen);
     vector[(width*4)-3] = height / 2 + (randomizeFloat(2.0) * scale * 2) - scale;
-    vector[(width*4)-2] = (((float) width / (windowSize / 2.0f) - 1.0f) + offScreen);
+    vector[(width*4)-2] = (((float) width / (windowSize / 2) - 1) + offScreen);
     vector[(width*4)-1] = -1.0f;
 
-    vector[0] = -1.0f + _offScreen;
-    if (seed <= -2.0f)
+    if (seed) {
+        vector[0] = seed[0];
+        vector[1] = seed[1];
+        vector[2] = seed[2];
+        vector[3] = seed[3];
+    } else {
+        vector[0] = (((float) 0 / (windowSize / 2) - 1) + offScreen);
         vector[1] = height / 2 + (randomizeFloat(2.0) * scale * 2) - scale;
-    else
-        vector[1] = seed;
+        vector[2] = (((float) 0 / (windowSize / 2) - 1) + offScreen);
+        vector[3] = -1.0f;
+    }
 
-
-    vector[2] = -1.0f + _offScreen;
-    vector[3] = -1.0f;
 
     scale *= roughness;
     setDisplacement(width, 0, width/2, vector, scale);
