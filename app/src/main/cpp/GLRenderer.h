@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 #include <android/native_window.h>
+
 #include <vector>
 using std::vector;
 
@@ -24,13 +25,15 @@ class GLRenderer {
         pthread_t threadId;
         pthread_mutex_t mutex;
 
+        ANativeWindow *window;
+
+        vector<Mountain*> mountains;
+
         GLuint gProgram;
         GLint gTranslation;
         GLint gColor;
 
-        ANativeWindow *window;
-
-        vector<Mountain*> mountains;
+        GLuint *vboIds;
 
         bool draw;
 
@@ -47,7 +50,6 @@ class GLRenderer {
         void initialize();
         void destroy();
         void renderLoop();
-        void initVBOs();
         void drawFrame();
 
         bool setupGraphics();

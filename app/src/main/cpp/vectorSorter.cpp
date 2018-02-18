@@ -7,14 +7,14 @@
 #define AVG2(a,b) ((a + b) / 2)
 
 int _windowSize;
-int _offScreen;
+GLfloat _offScreen;
 
 void makeMountain(int right, int left, GLfloat *vector, float roughness, float scale);
 
 float randomizeFloat(float max) {
     float randomN;
     randomN = ((float)rand()/(float)(RAND_MAX) * max);
-    return randomN-1.0;
+    return randomN;
 }
 
 void initRand() {
@@ -29,10 +29,10 @@ void setDisplacement(int right, int left, int middle, GLfloat *vector, float sca
     //if (middle == 1)
        //problem++;
 
-    vector[(problem*4)-4] = (((float) (middle) / (_windowSize / 2.0f) - 1.0f) + _offScreen);
+    vector[(problem*4)-4] = (((float) (middle) / (_windowSize / 2) - 1) + _offScreen);
     vector[(problem*4)-3] = AVG2(vector[(left*4)-3], vector[(right*4)-3]);
-    vector[(problem*4)-3] += (randomizeFloat(1.0) * scale * 2) - scale;
-    vector[(problem*4)-2] = (((float) (middle) / (_windowSize / 2.0f) - 1.0f) + _offScreen);
+    vector[(problem*4)-3] += (randomizeFloat(2.0) * scale * 2) - scale;
+    vector[(problem*4)-2] = (((float) (middle) / (_windowSize / 2) - 1) + _offScreen);
     vector[(problem*4)-1] = -1.0f;
 }
 
@@ -49,12 +49,15 @@ void makeMountain(int right, int left, GLfloat *vector, float roughness, float s
     }
 }
 
-void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, float scale, GLfloat *seed) {
+void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, GLfloat *seed) {
     _windowSize = windowSize;
     _offScreen = offScreen;
 
+    float scale = height / 8;
+
     vector[(width*4)-4] = (((float) width / (windowSize / 2) - 1) + offScreen);
     vector[(width*4)-3] = height / 2 + (randomizeFloat(2.0) * scale * 2) - scale;
+    vector[(width*4)-3] = vector[(width*4)-3] / (height / 2) - 1;
     vector[(width*4)-2] = (((float) width / (windowSize / 2) - 1) + offScreen);
     vector[(width*4)-1] = -1.0f;
 

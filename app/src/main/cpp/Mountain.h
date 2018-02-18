@@ -13,43 +13,40 @@ class Mountain {
         GLfloat *vertices;
         GLfloat *lastHeightMapped;
 
-        float scale;
-        float maxHeight;
         float off;
+        float mountainRoughness;
         float moved;
         float scrollSpeed;
-        float mountainRoughness;
         float *translation;
 
-        GLint *translationShader;
+        int bufferSize;
+        int length;
+        int verticesNumber;
 
-        unsigned int windowSize;
-        unsigned int bufferSize;
-        unsigned int length;
-        unsigned int verticesNumber;
+        int offset;
+        int stride;
 
-        unsigned int offset;
-        unsigned int stride;
+        bool dirty;
 
         GLuint *MOUNTAIN_ID;
 
-        void seedVertice(unsigned int _length);
+        void seedVertice(int _length);
         void cache();
     public:
 
-        Mountain(unsigned int _windowSize, unsigned int _length,
-                 float _mountainRoughness, float _scrollSpeed, float _maxHeight,
-                 GLint *_translationShader, GLuint *_ID);
+        Mountain(int _windowSize, int _length, float _mountainRoughness, float _scrollSpeed, GLuint *_ID);
         Mountain();
         ~Mountain();
 
         void setTranslationValueIndex(int index, float value);
         float getTranslationValueIndex(int index);
 
-        void shape(unsigned int _length, float offScreen = 0);
         void bind();
-        void update();
-        void draw();
+        void shape(int _windowSize, int _length, float offScreen = 0);
+        void update(int _windowSize);
+        void draw(GLint &uniform4);
+
+        bool isDirty();
 
 };
 

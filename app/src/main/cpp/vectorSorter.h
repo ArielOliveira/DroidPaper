@@ -8,6 +8,6 @@
 #include <GLES2/gl2.h>
 
 void initRand();
-void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, float scale, GLfloat *seed = NULL);
+void setBorders(int windowSize, int width, GLfloat offScreen, float *vector, float height, float roughness, GLfloat *seed = NULL);
 
 #endif //DROIDPAPEREVOLUTION_VECTORSORTER_H
