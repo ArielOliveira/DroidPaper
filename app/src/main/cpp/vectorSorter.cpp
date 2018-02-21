@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include "vectorSorter.h"
+#include "randUtils.h"
 #include "logger.h"
 
 #define AVG2(a,b) ((a + b) / 2)
@@ -10,16 +8,6 @@ int _windowSize;
 GLfloat _offScreen;
 
 void makeMountain(int right, int left, GLfloat *vector, float roughness, float scale);
-
-float randomizeFloat(float max) {
-    float randomN;
-    randomN = ((float)rand()/(float)(RAND_MAX) * max);
-    return randomN;
-}
-
-void initRand() {
-    srand(time(NULL));
-}
 
 void setDisplacement(int right, int left, int middle, GLfloat *vector, float scale) {
     if (left == 0 || left == 1)

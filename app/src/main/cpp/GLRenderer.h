@@ -31,7 +31,7 @@ class GLRenderer {
 
         GLuint gProgram;
         GLint gTranslation;
-        GLint gColor;
+        GLint gAmbient;
 
         GLuint *vboIds;
 

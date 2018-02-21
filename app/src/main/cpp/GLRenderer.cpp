@@ -6,7 +6,7 @@
 
 #include "geometryTestObjects.h"
 
-float squareColors[] = {0.545, 0.271, 0.075, 1.0f,
+float mountainColors[] = {0.545, 0.271, 0.075, 1.0f,
                         0.545, 0.271, 0.075, 1.0f,
                         0.545, 0.271, 0.075, 1.0f,
                         0.545, 0.271, 0.075, 1.0f,};
@@ -16,13 +16,14 @@ GLRenderer::GLRenderer(): msg(MSG_NONE), draw(false) {
     surfaceAcquired = surfaceManager->hasSurface();
     pthread_mutex_init(&mutex, 0);
 
-    vboIds = new GLuint[3];
+    initRand();
+
+    vboIds = new GLuint[6];
 }
 
 GLRenderer::~GLRenderer() {
     pthread_mutex_destroy(&mutex);
-
-    glDeleteBuffers(3, vboIds);
+    destroy();
 }
 
 void GLRenderer::start() {
@@ -55,8 +56,16 @@ bool GLRenderer::setupGraphics() {
     LOGI("glBindAttribLocation(\"vPosition\") = %d\n",
          VERTEX_POSITION_INDX);
 
-    gColor = glGetUniformLocation(gProgram, "uniformColor");
+    glBindAttribLocation(gProgram, VERTEX_COLOR_INDX, "vColor");
+    checkGlError("glBindAttribLocation");
+    LOGI("glBindAttribLocation(\"vColor\") = %d\n",
+         VERTEX_COLOR_INDX);
+
     gTranslation = glGetUniformLocation(gProgram, "myTranslation");
+
+    gAmbient = glGetUniformLocation(gProgram, "ambient_color");
+    if (gAmbient < 0)
+        LOGI("Error gAmbient");
 
     glViewport(0, 0, surfaceManager->getWidth(), surfaceManager->getHeight());
     checkGlError("glViewport");
@@ -79,10 +88,25 @@ void GLRenderer::destroy() {
 
     mountains.clear();
 
-    glDeleteBuffers(2, vboIds);
+    glDeleteBuffers(6, vboIds);
 }
 
 void GLRenderer::drawFrame() {
+    static bool eita;
+    static float ambient;
+    if (!eita) {
+        ambient += 0.001f;
+        if (ambient >= 1.0f)
+            eita = true;
+    } else {
+        ambient -= 0.001f;
+        if (ambient <= 0.0f)
+            eita = false;
+    }
+
+
+
+
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -90,26 +114,40 @@ void GLRenderer::drawFrame() {
 
     glUseProgram(gProgram);
 
-    glUniform4f(gColor, color[0]-0.015f, color[1]-0.015f, color[2]-0.015f, color[3]);
+    glUniform4f(gAmbient, ambientColor[0]+ambient, ambientColor[1]+ambient, ambientColor[2]+ambient, ambientColor[3]+ambient);
+
+    glVertexAttrib4f(VERTEX_COLOR_INDX, color[0], color[1], color[2], color[3]);
     mountains[0]->bind();
     mountains[0]->draw(gTranslation);
     if (mountains[0]->isDirty()) {
         mountains[0]->update(surfaceManager->getWidth());
     }
 
-    glUniform4f(gColor, color[0]+0.045f, color[1]+0.045f, color[2]+0.045f, color[3]);
+    glVertexAttrib4f(VERTEX_COLOR_INDX, color[0]+0.045f, color[1]+0.045f, color[2]+0.045f, color[3]);
     mountains[2]->bind();
     mountains[2]->draw(gTranslation);
     if (mountains[2]->isDirty()) {
         mountains[2]->update(surfaceManager->getWidth());
     }
-
-    glUniform4f(gColor, color[0]+0.015f, color[1]+0.015f, color[2]+0.015f, color[3]);
+    glVertexAttrib4f(VERTEX_COLOR_INDX, color[0]+0.015f, color[1]+0.015f, color[2]+0.015f, color[3]);
     mountains[1]->bind();
     mountains[1]->draw(gTranslation);
     if (mountains[1]->isDirty()) {
         mountains[1]->update(surfaceManager->getWidth());
     }
+
+    glEnableVertexAttribArray(VERTEX_COLOR_INDX);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[2]);
+    glVertexAttribPointer(VERTEX_COLOR_INDX, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
+    glUniformMatrix4fv(gTranslation, 1, GL_FALSE, myTranslation1);
+    glVertexAttribPointer(VERTEX_POSITION_INDX, VERTEX_POSITION_SIZE, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+    glDisableVertexAttribArray(VERTEX_COLOR_INDX);
 
     surfaceManager->swapBuffers();
 
@@ -123,16 +161,23 @@ void GLRenderer::initialize() {
 
     setupGraphics();
 
-    glGenBuffers(3, vboIds);
+    glGenBuffers(6, vboIds);
+
+
+    cacheBufferByID(sky, 8, &vboIds[0], GL_STATIC_DRAW);
+    cacheIndiceByID(indices, 6, &vboIds[1], GL_STATIC_DRAW);
+
+    cacheBufferByID(skyColor, 16, &vboIds[2], GL_STATIC_DRAW);
+
     int width = surfaceManager->getWidth();
-    int height = surfaceManager->getHeight();
-    mountains = {new Mountain(width, width+(width/2), 0.4f, 0.005f, &vboIds[0]),
-                 new Mountain(width, width+(width/2), 0.7f, 0.00125f, &vboIds[1]),
-                 new Mountain(width, width+(width/2), 0.6f, 0.0025f, &vboIds[2])};
+
+    mountains = {new Mountain(width, width+(width/2), 0.4f, 0.005f, &vboIds[3]),
+                 new Mountain(width, width+(width/2), 0.7f, 0.00125f, &vboIds[4]),
+                 new Mountain(width, width+(width/2), 0.6f, 0.0025f, &vboIds[5])};
+
 
     mountains[2]->setTranslationValueIndex(7, -0.60f);
     mountains[0]->setTranslationValueIndex(7, -0.90f);
-
 
     glEnable(GL_DEPTH_TEST);
     glEnableVertexAttribArray(VERTEX_POSITION_INDX);

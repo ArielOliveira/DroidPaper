@@ -6,6 +6,8 @@
 #include "GLBufferManager.h"
 #include "logger.h"
 
+const float color[] = {1.0f, 1.0f, 0.0f, 1.0};
+
 Mountain::Mountain(int _windowSize, int _length, float _mountainRoughness, float _scrollSpeed, GLuint *ID):
         length(_length), stride((_length/3)*4),
         mountainRoughness(_mountainRoughness), scrollSpeed(_scrollSpeed), MOUNTAIN_ID(ID) {
@@ -44,8 +46,6 @@ Mountain::Mountain(int _windowSize, int _length, float _mountainRoughness, float
     offset = 0;
     off = 3.0f;
 
-    initRand();
-
     if (_windowSize) {
         shape(_windowSize, _length);
         seedVertice(_length);
@@ -80,6 +80,7 @@ void Mountain::draw(GLint &uniform4) {
     moved -= scrollSpeed;
     translation[3] -= scrollSpeed;
     glVertexAttribPointer(VERTEX_POSITION_INDX, VERTEX_POSITION_SIZE, GL_FLOAT, GL_FALSE, 0, 0);
+
     glDrawArrays(GL_LINES, 0, verticesNumber);
 }
 

@@ -6,19 +6,23 @@
 #define DROIDPAPER2_SHADERLIB_H
 
 const char vShaderStr[] =
-        "attribute vec4 vPosition;                              \n"
         "uniform mat4 myTranslation;                            \n"
+        "attribute vec4 vPosition;                              \n"
+        "attribute vec4 vColor;                                 \n"
+        "varying vec4 out_color;                                \n"
                 "void main()                                    \n"
                 "{                                              \n"
+                "   out_color = vColor;                         \n"
                 "   gl_Position = vPosition * myTranslation;    \n"
                 "}                                              \n";
 
 const char fShaderStr[] =
         "precision mediump float;                               \n"
-        "uniform lowp vec4 uniformColor;                             \n"
+        "varying vec4 out_color;                                \n"
+        "uniform vec4 ambient_color;                            \n"
                 "void main()                                    \n"
                 "{                                              \n"
-                "   gl_FragColor = uniformColor;                \n"
+                "   gl_FragColor = out_color * ambient_color;   \n"
                 "}                                              \n";
 
 #endif //DROIDPAPER2_SHADERLIB_H
